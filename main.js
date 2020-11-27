@@ -101,6 +101,7 @@ function investmentStats() {
   let min = Math.min(...accounts)
   let max = Math.max(...accounts)
   let total = 0
+  //if there are no accounts make everything 0
   if (accounts.length == 0) {
     outputEl.innerHTML = "Investment Stats(rounded), Max: $" + 0 +", Min: $" + 0 + " Average: $" + 0
   } else {
@@ -115,9 +116,12 @@ function addAccount() {
   // Prompt for a new account amount and add this to the invesment account
   // array. Output a confirmation that a new account was added with an
   // opening amount of _______.
+  //input
   let value = Number(prompt("Account amount")) 
-  if(value > 5000 || value < 0) {
+  //get rid of invalid values
+  if(value > 5000 || value < 0 || String(value) == "NaN") {
     outputEl.innerHTML = "Invalid account value, account not opened"
+  // add account with value
   } else {
   accounts.push(value)
   outputEl.innerHTML = "Account added, Opening: $" +  value;
@@ -147,19 +151,43 @@ function robinHood() {
   // how much each account received.
   let richCount = 0
   let poorCount = 0
+  let moneyBack = 0
+  //find number of rich accounts and number of poor accounts
   for (let i = 0; i < accounts.length; i ++) {
     if (accounts[i]>4000) {
-      accounts[i] -= 400
-      count ++
+      richCount ++
     } else if (accounts[i]<1000){
       poorCount ++
     }
-  }
-  
-  for (let i = 0; i < accounts.length; i ++) {
-    if (accounts[i] < 1000){
-      accounts[i]
+  //dont take away money if there are no poor people!
+  } if (poorCount == 0) {
+      outputEl.innerHTML = "Robin Hood, Money recieved: $" + 0 +" for " + 0 + " accounts"
+  //proceed with theft
+  } else {
+    //calculate total money taken/per account
+    let moneyPerAcc = richCount*400/poorCount
+    //secondary scan to determine how much money needs to be returned
+    for (let i = 0; i < accounts.length; i ++) {
+      if (accounts[i] < 1000) {
+        if (accounts[i] + moneyPerAcc > 5000) {
+          moneyBack += accounts[i] + moneyPerAcc - 5000
+        }
+      }
     }
+    //give money to poor accounts
+    for (let i = 0; i < accounts.length; i ++) {
+      if (accounts[i] < 1000){
+        accounts[i] += moneyPerAcc
+      //account balance cannot exceed 5000
+        if (accounts[i] > 5000) {
+          accounts[i] = 5000
+        }
+      //take money away from rich (and return surplus above 5000)
+      } else if (accounts[i]> 4000) {
+        accounts[i] -= 400
+        accounts[i] += moneyBack/richCount
+      }
+    }
+    outputEl.innerHTML = "Robin Hood, Money recieved: $" + Math.round(moneyPerAcc) +" (before deductions) for " + poorCount + " accounts"
   }
-  outputEl.innerHTML = "Robin Hood";
 }
